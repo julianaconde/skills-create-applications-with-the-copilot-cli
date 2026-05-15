@@ -1,0 +1,14 @@
+{
+  "name": "calculator",
+  "version": "1.0.0",
+  "description": "A Node.js CLI calculator supporting basic and advanced math operations",
+  "main": "src/calculator.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
