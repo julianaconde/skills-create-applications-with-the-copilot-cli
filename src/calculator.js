@@ -68,7 +68,7 @@ function printUsage(io = console) {
   io.log('  division       (/)  : 10 / 5');
   io.log('  modulo         (%)  : 10 % 3');
   io.log('  power          (**) : 2 ** 8');
-  io.log('  squareRoot  (sqrt)  : sqrt 16');
+  io.log('  squareRoot   (sqrt) : sqrt 16');
 }
 
 /**
