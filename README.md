@@ -24,3 +24,12 @@ Supported operations:
 - `-` or `subtract`
 - `*` or `multiply`
 - `/` or `divide`
+- `%` or `modulo`
+- `^` or `power`
+- `sqrt` for square root
+
+Square root uses a unary form:
+
+```bash
+node src/calculator.js sqrt 81
+```

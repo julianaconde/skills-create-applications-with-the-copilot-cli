@@ -7,6 +7,9 @@
 // - subtraction (-, subtract, subtraction)
 // - multiplication (*, x, multiply, multiplication)
 // - division (/, divide, division)
+// - modulo (%, mod, modulo)
+// - exponentiation (^, power, exponent, exponentiation)
+// - square root (sqrt, square-root, squareroot)
 
 const operationAliases = new Map([
   ['+', 'add'],
@@ -21,12 +24,25 @@ const operationAliases = new Map([
   ['multiplication', 'multiply'],
   ['/', 'divide'],
   ['divide', 'divide'],
-  ['division', 'divide']
+  ['division', 'divide'],
+  ['%', 'modulo'],
+  ['mod', 'modulo'],
+  ['modulo', 'modulo'],
+  ['^', 'power'],
+  ['power', 'power'],
+  ['exponent', 'power'],
+  ['exponentiation', 'power'],
+  ['sqrt', 'squareRoot'],
+  ['square-root', 'squareRoot'],
+  ['squareroot', 'squareRoot']
 ]);
 
 function printUsage(io = console) {
   io.error('Usage: node src/calculator.js <number1> <operation> <number2>');
-  io.error('Operations: +, -, *, /, add, subtract, multiply, divide');
+  io.error('Usage: node src/calculator.js <operation> <number>');
+  io.error(
+    'Operations: +, -, *, /, %, ^, add, subtract, multiply, divide, modulo, power, sqrt'
+  );
 }
 
 function parseNumber(value, label) {
@@ -43,6 +59,26 @@ function normalizeOperation(operation) {
   return operationAliases.get(operation.toLowerCase());
 }
 
+function modulo(a, b) {
+  if (b === 0) {
+    throw new Error('Modulo by zero is not allowed.');
+  }
+
+  return a % b;
+}
+
+function power(base, exponent) {
+  return base ** exponent;
+}
+
+function squareRoot(n) {
+  if (n < 0) {
+    throw new Error('Square root of a negative number is not allowed.');
+  }
+
+  return Math.sqrt(n);
+}
+
 function calculate(left, operation, right) {
   switch (operation) {
     case 'add':
@@ -57,12 +93,39 @@ function calculate(left, operation, right) {
       }
 
       return left / right;
+    case 'modulo':
+      return modulo(left, right);
+    case 'power':
+      return power(left, right);
+    case 'squareRoot':
+      return squareRoot(left);
     default:
       throw new Error(`Unsupported operation: "${operation}".`);
   }
 }
 
 function main(args = process.argv.slice(2), io = console) {
+  if (args.length === 2) {
+    const [operationInput, valueInput] = args;
+    const normalizedOperation = normalizeOperation(operationInput);
+
+    if (normalizedOperation !== 'squareRoot') {
+      printUsage(io);
+      return 1;
+    }
+
+    try {
+      const value = parseNumber(valueInput, 'number');
+      const result = calculate(value, normalizedOperation);
+
+      io.log(result);
+      return 0;
+    } catch (error) {
+      io.error(error.message);
+      return 1;
+    }
+  }
+
   const [leftInput, operationInput, rightInput] = args;
 
   if (!leftInput || !operationInput || !rightInput) {
@@ -94,9 +157,12 @@ function main(args = process.argv.slice(2), io = console) {
 module.exports = {
   calculate,
   main,
+  modulo,
   normalizeOperation,
   parseNumber,
-  printUsage
+  power,
+  printUsage,
+  squareRoot
 };
 
 if (require.main === module) {

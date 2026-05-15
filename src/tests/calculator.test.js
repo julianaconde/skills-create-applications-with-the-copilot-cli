@@ -3,8 +3,11 @@
 const {
   calculate,
   main,
+  modulo,
   normalizeOperation,
-  parseNumber
+  parseNumber,
+  power,
+  squareRoot
 } = require('../calculator');
 
 describe('normalizeOperation', () => {
@@ -21,13 +24,22 @@ describe('normalizeOperation', () => {
     ['multiplication', 'multiply'],
     ['/', 'divide'],
     ['divide', 'divide'],
-    ['division', 'divide']
+    ['division', 'divide'],
+    ['%', 'modulo'],
+    ['mod', 'modulo'],
+    ['modulo', 'modulo'],
+    ['^', 'power'],
+    ['power', 'power'],
+    ['exponentiation', 'power'],
+    ['sqrt', 'squareRoot'],
+    ['square-root', 'squareRoot'],
+    ['squareroot', 'squareRoot']
   ])('maps %s to %s', (input, expected) => {
     expect(normalizeOperation(input)).toBe(expected);
   });
 
   test('returns undefined for an unsupported operation', () => {
-    expect(normalizeOperation('%')).toBeUndefined();
+    expect(normalizeOperation('noop')).toBeUndefined();
   });
 });
 
@@ -68,15 +80,59 @@ describe('calculate', () => {
     expect(calculate(7.5, 'divide', 2.5)).toBe(3);
   });
 
+  test('returns the modulo', () => {
+    expect(calculate(10, 'modulo', 3)).toBe(1);
+  });
+
+  test('raises a number to a power', () => {
+    expect(calculate(2, 'power', 4)).toBe(16);
+  });
+
+  test('returns the square root', () => {
+    expect(calculate(81, 'squareRoot')).toBe(9);
+  });
+
   test('throws for division by zero', () => {
     expect(() => calculate(20, 'divide', 0)).toThrow(
       'Division by zero is not allowed.'
     );
   });
 
+  test('throws for modulo by zero', () => {
+    expect(() => calculate(20, 'modulo', 0)).toThrow(
+      'Modulo by zero is not allowed.'
+    );
+  });
+
+  test('throws for square root of a negative number', () => {
+    expect(() => calculate(-9, 'squareRoot')).toThrow(
+      'Square root of a negative number is not allowed.'
+    );
+  });
+
   test('throws for unsupported operations', () => {
-    expect(() => calculate(1, 'power', 2)).toThrow(
-      'Unsupported operation: "power".'
+    expect(() => calculate(1, 'unsupported', 2)).toThrow(
+      'Unsupported operation: "unsupported".'
+    );
+  });
+});
+
+describe('operation helpers', () => {
+  test('modulo returns the remainder', () => {
+    expect(modulo(17, 5)).toBe(2);
+  });
+
+  test('power returns the exponentiation result', () => {
+    expect(power(3, 3)).toBe(27);
+  });
+
+  test('squareRoot returns the square root for positive numbers', () => {
+    expect(squareRoot(25)).toBe(5);
+  });
+
+  test('squareRoot throws for negative numbers', () => {
+    expect(() => squareRoot(-1)).toThrow(
+      'Square root of a negative number is not allowed.'
     );
   });
 });
@@ -117,6 +173,27 @@ describe('main', () => {
     expect(io.log).toHaveBeenCalledWith(4);
   });
 
+  test('runs the modulo example', () => {
+    const io = createIo();
+
+    expect(main(['10', '%', '3'], io)).toBe(0);
+    expect(io.log).toHaveBeenCalledWith(1);
+  });
+
+  test('runs the power example', () => {
+    const io = createIo();
+
+    expect(main(['2', '^', '4'], io)).toBe(0);
+    expect(io.log).toHaveBeenCalledWith(16);
+  });
+
+  test('runs the square root example', () => {
+    const io = createIo();
+
+    expect(main(['sqrt', '49'], io)).toBe(0);
+    expect(io.log).toHaveBeenCalledWith(7);
+  });
+
   test('returns an error for missing arguments', () => {
     const io = createIo();
 
@@ -127,15 +204,19 @@ describe('main', () => {
     );
     expect(io.error).toHaveBeenNthCalledWith(
       2,
-      'Operations: +, -, *, /, add, subtract, multiply, divide'
+      'Usage: node src/calculator.js <operation> <number>'
+    );
+    expect(io.error).toHaveBeenNthCalledWith(
+      3,
+      'Operations: +, -, *, /, %, ^, add, subtract, multiply, divide, modulo, power, sqrt'
     );
   });
 
   test('returns an error for unsupported operations', () => {
     const io = createIo();
 
-    expect(main(['2', '%', '3'], io)).toBe(1);
-    expect(io.error).toHaveBeenNthCalledWith(1, 'Unsupported operation: "%".');
+    expect(main(['2', 'noop', '3'], io)).toBe(1);
+    expect(io.error).toHaveBeenNthCalledWith(1, 'Unsupported operation: "noop".');
   });
 
   test('returns an error for invalid numbers', () => {
@@ -152,5 +233,14 @@ describe('main', () => {
 
     expect(main(['20', '/', '0'], io)).toBe(1);
     expect(io.error).toHaveBeenCalledWith('Division by zero is not allowed.');
+  });
+
+  test('returns an error for square root of a negative number', () => {
+    const io = createIo();
+
+    expect(main(['sqrt', '-9'], io)).toBe(1);
+    expect(io.error).toHaveBeenCalledWith(
+      'Square root of a negative number is not allowed.'
+    );
   });
 });
